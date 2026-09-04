@@ -1,0 +1,13 @@
+name = "tefila-hannah"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Crea el namespace con:  npx wrangler kv namespace create PEDIDOS
+# y pega aquí el id que te devuelve.
+[[kv_namespaces]]
+binding = "PEDIDOS"
+id = "REEMPLAZA_CON_EL_ID_DEL_KV"
