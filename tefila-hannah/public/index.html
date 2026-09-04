@@ -285,13 +285,9 @@
   }
 
   /* ---------- secret ---------- */
-  .secreto { text-align: center; margin-top: 96px; }
-  .secreto button {
-    appearance: none; background: none; border: 0; cursor: pointer;
-    font-size: 15px; opacity: .35; padding: 8px; transition: opacity .2s ease;
-  }
-  .secreto button:hover, .secreto button:focus-visible { opacity: 1; outline: none; }
-  .codigo { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+  .secreto { text-align: center; }
+  .mensaje .firma { cursor: default; user-select: none; }
+  .codigo { margin-top: 40px; display: flex; flex-direction: column; align-items: center; gap: 16px; }
   .codigo form { display: flex; flex-direction: column; align-items: center; gap: 16px; width: 100%; }
   .codigo .campo { width: min(100%, 320px); }
   .codigo input {
@@ -353,7 +349,7 @@
   .aviso a { color: var(--sky-deep); }
 
   @media (prefers-reduced-motion: reduce) {
-    .campo::after, .btn, .campo textarea, .campo input, .secreto button { transition: none; }
+    .campo::after, .btn, .campo textarea, .campo input { transition: none; }
   }
 </style>
 </head>
@@ -376,7 +372,7 @@
     <p>Te quiero desear todooo lo mejor del mundo: que todo lo que siempre quieras lo puedas alcanzar, que puedas ver la mano de H' en todo, que tengas todo lo bueno del mundo y que siempre H' te mande salud, mucha parnasá tová, y mucha tranquilidad y paz mental.</p>
     <p>También te quería pedir con muchísima confianza que si tienes cualquierrr pedido, desde lo más chico a lo más grande, me lo mandes aquí abajo. Si quieres que sea anónimo, o tienes algún nombre que quieres que piense el día de la boda, también lo puedes poner.</p>
     <p>Eres de verdad muy especial para mí. Estoy muyy emocionada de celebrar juntas en la boda 🩵🩵🩵</p>
-    <p class="firma">Hannah</p>
+    <p class="firma" id="firma-hannah">Hannah</p>
   </section>
 
   <form id="formulario" novalidate>
@@ -444,7 +440,6 @@
   </section>
 
   <div class="secreto">
-    <button type="button" id="abrir-lista" aria-expanded="false" aria-controls="codigo" aria-label="Acceso privado">🩵</button>
     <div class="codigo" id="codigo" hidden>
       <form id="form-codigo">
         <div class="campo"><input id="clave" type="password" placeholder="código" autocomplete="off" aria-label="Código"></div>
@@ -492,7 +487,7 @@
   const hebreo = $('hebreo');
   const errorEl = $('error'), enviarBtn = $('enviar');
   const gracias = $('gracias');
-  const lista = $('lista'), abrirLista = $('abrir-lista');
+  const lista = $('lista'), firma = $('firma-hannah');
   const filas = $('filas'), tabla = $('tabla'), vacio = $('vacio'), conteo = $('conteo'), avisoLista = $('aviso-lista');
   const excelBtn = $('excel'), copiarBtn = $('copiar-sheets');
   const TEXTO_ENVIAR = 'Enviar con amor';
@@ -568,33 +563,36 @@
 
   // ---- lista privada ----
   let registros = [];
-  let codigoActivo = '';
+  let codigoActivo = ''; // solo en memoria: al recargar se pide de nuevo
   let temporizador = null;
   const codigo = $('codigo'), formCodigo = $('form-codigo'), clave = $('clave'), errorCodigo = $('error-codigo');
-  try { codigoActivo = sessionStorage.getItem('tefila-hannah-codigo') || ''; } catch (e) {}
 
   function mostrarLista() {
     codigo.hidden = true;
     lista.hidden = false;
-    abrirLista.setAttribute('aria-expanded', 'true');
     cargar();
     if (!temporizador) temporizador = setInterval(cargar, 30000);
     lista.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   function ocultarLista() {
     lista.hidden = true;
-    abrirLista.setAttribute('aria-expanded', 'false');
     if (temporizador) { clearInterval(temporizador); temporizador = null; }
   }
 
-  abrirLista.addEventListener('click', () => {
+  // Entrada escondida: tres toques seguidos sobre la firma de Hannah.
+  let toques = 0, ultimoToque = 0;
+  firma.addEventListener('click', () => {
+    const ahora = Date.now();
+    toques = ahora - ultimoToque < 1200 ? toques + 1 : 1;
+    ultimoToque = ahora;
+    if (toques < 3) return;
+    toques = 0;
     if (codigoActivo) {
       if (lista.hidden) mostrarLista(); else ocultarLista();
       return;
     }
     codigo.hidden = !codigo.hidden;
-    abrirLista.setAttribute('aria-expanded', String(!codigo.hidden));
-    if (!codigo.hidden) { clave.value = ''; errorCodigo.textContent = ''; clave.focus(); }
+    if (!codigo.hidden) { clave.value = ''; errorCodigo.textContent = ''; codigo.scrollIntoView({ behavior: 'smooth', block: 'center' }); clave.focus(); }
   });
 
   formCodigo.addEventListener('submit', async (ev) => {
@@ -606,7 +604,6 @@
     if (!r || r.status === 401) { errorCodigo.textContent = 'Ese no es el código.'; clave.select(); return; }
     if (!r.ok) { errorCodigo.textContent = 'No se pudo cargar la lista. Inténtalo de nuevo.'; return; }
     codigoActivo = intento;
-    try { sessionStorage.setItem('tefila-hannah-codigo', intento); } catch (e) {}
     registros = await r.json();
     pintar();
     mostrarLista();
@@ -618,7 +615,6 @@
       const r = await fetch(API, { headers: { 'x-codigo': codigoActivo } });
       if (r.status === 401) {
         codigoActivo = '';
-        try { sessionStorage.removeItem('tefila-hannah-codigo'); } catch (e) {}
         ocultarLista();
         return;
       }

@@ -53,7 +53,7 @@ Wrangler imprime la URL. Para volver a publicar después de un cambio: `npx wran
 - `POST /api/pedidos` guarda un pedido (público, sin login).
 - `GET /api/pedidos` devuelve todos los pedidos. Solo responde si el header `x-codigo`
   trae el código privado; el código no está escrito en el código fuente, solo su huella SHA-256.
-- El 🩵 al final de la página abre la casilla del código. Con el código correcto aparece la
+- La entrada privada está escondida: tres toques seguidos sobre la firma "Hannah" al final de su mensaje abren la casilla del código. El código se pide en cada recarga. Con el código correcto aparece la
   lista, el botón de Excel y el de copiar para Google Sheets.
 
 ## Cambiar el código privado
