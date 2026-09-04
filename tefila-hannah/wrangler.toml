@@ -1,0 +1,17 @@
+name = "tefila-hannah"
+main = "src/worker.js"
+compatibility_date = "2025-06-01"
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+# Los pedidos se guardan en un Durable Object con SQLite.
+# No hay que crear nada en el panel: el primer deploy lo crea solo.
+[[durable_objects.bindings]]
+name = "PEDIDOS"
+class_name = "Pedidos"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Pedidos"]
