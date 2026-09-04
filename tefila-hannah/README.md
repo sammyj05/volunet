@@ -5,7 +5,23 @@ Corre en Cloudflare Workers: la página es estática (`public/`) y los pedidos s
 Durable Object con SQLite. No hay que crear bases de datos ni nada en el panel: el primer deploy
 lo crea todo.
 
-## Opción A: publicar desde el panel de Cloudflare (sin terminal)
+## Opción A: publicación automática desde GitHub (recomendada)
+
+Hay un workflow en `.github/workflows/deploy-tefila.yml` que publica en Cloudflare cada vez que
+se sube un cambio a esta carpeta. Solo necesita dos secrets en el repo, una sola vez:
+
+1. En Cloudflare: https://dash.cloudflare.com/profile/api-tokens → **Create Token** →
+   plantilla **Edit Cloudflare Workers** → Continue → Create Token. Copia el token.
+2. Tu **Account ID** está en https://dash.cloudflare.com, en la barra lateral derecha de la
+   página principal de Workers & Pages.
+3. En GitHub: repo → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
+   - `CLOUDFLARE_API_TOKEN` = el token
+   - `CLOUDFLARE_ACCOUNT_ID` = el Account ID
+4. Repo → **Actions** → **Deploy Tefilá de Hannah** → **Run workflow**. Al terminar, el log
+   del paso "Publicar en Cloudflare" muestra la URL, algo como
+   `https://tefila-hannah.<tu-cuenta>.workers.dev`.
+
+## Opción B: publicar desde el panel de Cloudflare (sin terminal)
 
 1. Entra a https://dash.cloudflare.com y crea una cuenta gratis si no tienes.
 2. Menú izquierdo: **Workers & Pages** → **Create** → pestaña **Workers** → **Import a repository**.
@@ -19,7 +35,7 @@ lo crea todo.
 
 Cada vez que se suba un cambio a la rama conectada, Cloudflare vuelve a publicar solo.
 
-## Opción B: publicar desde la terminal
+## Opción C: publicar desde la terminal
 
 Necesitas Node 18+.
 
