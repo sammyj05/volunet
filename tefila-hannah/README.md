@@ -1,29 +1,36 @@
 # Tefilá de Hannah
 
 Página donde las invitadas dejan los pedidos que Hannah lleva en su Tefilá el día de la boda.
-Corre en Cloudflare Workers: la página es estática (`public/`) y los pedidos se guardan en Workers KV.
+Corre en Cloudflare Workers: la página es estática (`public/`) y los pedidos se guardan en un
+Durable Object con SQLite. No hay que crear bases de datos ni nada en el panel: el primer deploy
+lo crea todo.
 
-## Desplegar (una sola vez, ~5 minutos)
+## Opción A: publicar desde el panel de Cloudflare (sin terminal)
 
-Necesitas Node 18+ y una cuenta de Cloudflare (el plan gratis alcanza).
+1. Entra a https://dash.cloudflare.com y crea una cuenta gratis si no tienes.
+2. Menú izquierdo: **Workers & Pages** → **Create** → pestaña **Workers** → **Import a repository**.
+3. Conecta tu cuenta de GitHub y elige este repositorio.
+4. En la configuración del proyecto:
+   - **Root directory:** `tefila-hannah`
+   - **Build command:** déjalo vacío
+   - **Deploy command:** `npx wrangler deploy`
+5. **Deploy**. Al terminar, Cloudflare muestra la URL, algo como
+   `https://tefila-hannah.<tu-cuenta>.workers.dev`. Ese es el enlace para mandar.
+
+Cada vez que se suba un cambio a la rama conectada, Cloudflare vuelve a publicar solo.
+
+## Opción B: publicar desde la terminal
+
+Necesitas Node 18+.
 
 ```bash
 cd tefila-hannah
 npm install
-npx wrangler login                          # abre el navegador para autorizar
-npx wrangler kv namespace create PEDIDOS    # devuelve un id
-```
-
-Pega ese `id` en `wrangler.toml` donde dice `REEMPLAZA_CON_EL_ID_DEL_KV`, y luego:
-
-```bash
+npx wrangler login     # abre el navegador para autorizar
 npx wrangler deploy
 ```
 
-Wrangler imprime la URL, algo como `https://tefila-hannah.<tu-cuenta>.workers.dev`.
-Ese es el enlace que se manda por WhatsApp.
-
-Para volver a publicar después de un cambio: `npx wrangler deploy`.
+Wrangler imprime la URL. Para volver a publicar después de un cambio: `npx wrangler deploy`.
 
 ## Cómo funciona
 
@@ -39,5 +46,5 @@ Para volver a publicar después de un cambio: `npx wrangler deploy`.
 printf 'NUEVOCODIGO' | sha256sum
 ```
 
-Reemplaza el valor de `HUELLA_CODIGO` en `src/worker.js` con esa huella (en mayúsculas y sin espacios
-el código, antes de calcularla) y vuelve a desplegar.
+Escribe el código en mayúsculas y sin espacios antes de calcular la huella. Reemplaza el valor
+de `HUELLA_CODIGO` en `src/worker.js` con el resultado y vuelve a publicar.

@@ -6,8 +6,12 @@ compatibility_date = "2025-06-01"
 directory = "./public"
 binding = "ASSETS"
 
-# Crea el namespace con:  npx wrangler kv namespace create PEDIDOS
-# y pega aquí el id que te devuelve.
-[[kv_namespaces]]
-binding = "PEDIDOS"
-id = "REEMPLAZA_CON_EL_ID_DEL_KV"
+# Los pedidos se guardan en un Durable Object con SQLite.
+# No hay que crear nada en el panel: el primer deploy lo crea solo.
+[[durable_objects.bindings]]
+name = "PEDIDOS"
+class_name = "Pedidos"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Pedidos"]
